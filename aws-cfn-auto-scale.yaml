@@ -92,6 +92,78 @@ Resources:
       RouteTableId: !Ref PublicRouteTable
 
   #------------------------------------------------------------------#
+  # NAT Gateway Resources
+  #------------------------------------------------------------------#
+  # Elastic IPs for each NAT Gateway
+  NATGatewayEIP1:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+  NATGatewayEIP2:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+  # NAT Gateway in AZ 1
+  NATGateway1:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NATGatewayEIP1.AllocationId
+      SubnetId: !Ref PublicSubnet1
+      Tags:
+        - Key: Name
+          Value: NATGateway-AZ1
+
+  # NAT Gateway in AZ 2
+  NATGateway2:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NATGatewayEIP2.AllocationId
+      SubnetId: !Ref PublicSubnet2
+      Tags:
+        - Key: Name
+          Value: NATGateway-AZ2
+
+  # Private Route Table for AZ 1
+  PrivateRouteTable1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Wk3LapVpc
+
+  PrivateDefaultRoute1:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable1
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NATGateway1
+
+  PrivateSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet1
+      RouteTableId: !Ref PrivateRouteTable1
+
+  # Private Route Table for AZ 2
+  PrivateRouteTable2:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Wk3LapVpc
+
+  PrivateDefaultRoute2:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable2
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NATGateway2
+
+  PrivateSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet2
+      RouteTableId: !Ref PrivateRouteTable2
+
+  #------------------------------------------------------------------#
   #  Security Groups
   #------------------------------------------------------------------#
   ALBSecurityGroup:
@@ -216,7 +288,7 @@ Resources:
       MaxSize: 4
       TargetGroupARNs:
         - !Ref ALBTargetGroup
-      HealthCheckType: EC2
+      HealthCheckType: ELB
       HealthCheckGracePeriod: 300
       Tags:
         - Key: Name
@@ -277,3 +349,11 @@ Resources:
       ComparisonOperator: LessThanThreshold
       AlarmActions:
         - !Ref ScaleInPolicy
+
+  #------------------------------------------------------------------#
+  #  Outputs
+  #------------------------------------------------------------------#
+Outputs:
+  LoadBalancerDNS:
+    Description: Public URL of the Application Load Balancer
+    Value: !GetAtt WK3ALB.DNSName
