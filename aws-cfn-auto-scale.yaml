@@ -222,3 +222,58 @@ Resources:
         - Key: Name
           Value: WebServerASG
           PropagateAtLaunch: true
+
+  #------------------------------------------------------------------#
+  #  Scaling Policies & CloudWatch Alarms
+  #------------------------------------------------------------------#
+  ScaleOutPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AutoScalingGroupName: !Ref WebServerASG
+      PolicyType: SimpleScaling
+      AdjustmentType: ChangeInCapacity
+      ScalingAdjustment: 1
+      Cooldown: 60
+
+  CPUAlarmHigh:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Scale out if CPU > 30% for 2 minutes
+      Namespace: AWS/EC2
+      MetricName: CPUUtilization
+      Dimensions:
+        - Name: AutoScalingGroupName
+          Value: !Ref WebServerASG
+      Statistic: Average
+      Period: 60
+      EvaluationPeriods: 2
+      Threshold: 30
+      ComparisonOperator: GreaterThanThreshold
+      AlarmActions:
+        - !Ref ScaleOutPolicy
+
+  ScaleInPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AutoScalingGroupName: !Ref WebServerASG
+      PolicyType: SimpleScaling
+      AdjustmentType: ChangeInCapacity
+      ScalingAdjustment: -1
+      Cooldown: 60
+
+  CPUAlarmLow:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Scale in if CPU < 10% for 2 minutes
+      Namespace: AWS/EC2
+      MetricName: CPUUtilization
+      Dimensions:
+        - Name: AutoScalingGroupName
+          Value: !Ref WebServerASG
+      Statistic: Average
+      Period: 60
+      EvaluationPeriods: 2
+      Threshold: 10
+      ComparisonOperator: LessThanThreshold
+      AlarmActions:
+        - !Ref ScaleInPolicy
