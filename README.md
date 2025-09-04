@@ -1,6 +1,3 @@
-Got it ✅
-Here’s a **README.md** you can include with your final CloudFormation template submission:
-
 ````markdown
 # Auto Scaling Lab with Apache Web Server
 
@@ -117,7 +114,4 @@ aws cloudformation delete-stack --stack-name AutoScalingLab
 
 ```
 
----
-
-Would you like me to also create a **shorter student-friendly README** (like 1-page summary with fewer details), or keep this full version for submission?
 ```
