@@ -425,16 +425,6 @@ Resources:
           PredefinedMetricType: ASGAverageCPUUtilization
         TargetValue: 30.0
 
-  ScaleDownPolicy:
-    Type: AWS::AutoScaling::ScalingPolicy
-    Properties:
-      AutoScalingGroupName: !Ref AutoScalingGroup
-      PolicyType: TargetTrackingScaling
-      TargetTrackingConfiguration:
-        PredefinedMetricSpecification:
-          PredefinedMetricType: ASGAverageCPUUtilization
-        TargetValue: 10.0
-
 Outputs:
   LoadBalancerDNS:
     Description: Load Balancer DNS Name
