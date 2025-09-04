@@ -452,3 +452,9 @@ Outputs:
     Value: !GetAtt LoadBalancer.DNSName
     Export:
       Name: LoadBalancerDNS
+
+  LoadBalancerURL:
+    Description: Load Balancer URL
+    Value: !Sub "http://${LoadBalancer.DNSName}"
+    Export:
+      Name: LoadBalancerURL
